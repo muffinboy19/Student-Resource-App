@@ -42,11 +42,10 @@ class _MyAppState extends State<MyApp> {
         splashColor: Constants.SKYBLUE,
         fontFamily: 'Montserrat',
         primaryColor: Constants.DARK_SKYBLUE,
-        backgroundColor: Colors.white,
         primaryIconTheme: IconTheme.of(context).copyWith(color: Colors.white),
         indicatorColor: Constants.WHITE,
         primaryTextTheme: TextTheme(
-          headline6: TextStyle(color: Colors.white),
+          titleLarge: TextStyle(color: Colors.white),
         ),
         tabBarTheme: TabBarTheme(
           labelColor: Constants.WHITE,
@@ -60,7 +59,7 @@ class _MyAppState extends State<MyApp> {
             TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
             TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
           },
-        ),
+        ), colorScheme: ColorScheme(background: Colors.white),
       ),
       title: 'SemBreaker',
       debugShowCheckedModeBanner: false,

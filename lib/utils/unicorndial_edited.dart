@@ -24,8 +24,7 @@ class UnicornButton extends FloatingActionButton {
       this.labelBackgroundColor,
       this.labelShadowColor,
       this.labelHasShadow = true,
-      this.hasLabel = false})
-      : assert(currentButton != null);
+      this.hasLabel = false});
 
   Widget returnLabel() {
     return Container(
@@ -87,8 +86,7 @@ class UnicornDialer extends StatefulWidget {
       this.animationDuration = 180,
       this.mainAnimationDuration = 200,
       this.childPadding = 4.0,
-      this.hasNotch = false})
-      : assert(parentButton != null);
+      this.hasNotch = false});
 
   _UnicornDialer createState() => _UnicornDialer();
 }
@@ -133,7 +131,7 @@ class _UnicornDialer extends State<UnicornDialer>
     this._animationController.reverse();
 
     var hasChildButtons =
-        widget.childButtons != null && widget.childButtons.length > 0;
+        widget.childButtons.length > 0;
 
     if (!this._parentController.isAnimating) {
       if (this._parentController.isCompleted) {
@@ -165,10 +163,8 @@ class _UnicornDialer extends State<UnicornDialer>
                   backgroundColor: widget.parentButtonBackground,
                   onPressed: () {
                     mainActionButtonOnPressed();
-                    if (widget.onMainButtonPressed != null) {
-                      widget.onMainButtonPressed();
-                    }
-                  },
+                    widget.onMainButtonPressed();
+                                    },
                   child: !hasChildButtons
                       ? widget.parentButton
                       : AnimatedBuilder(
@@ -194,8 +190,7 @@ class _UnicornDialer extends State<UnicornDialer>
                 angle: this._animationController.value * 0.8, child: mainFAB);
           });
 
-      var childButtonsList = widget.childButtons == null ||
-              widget.childButtons.length == 0
+      var childButtonsList = widget.childButtons.length == 0
           ? List<Widget>()
           : List.generate(widget.childButtons.length, (index) {
               var intervalValue = index == 0
@@ -272,8 +267,7 @@ class _UnicornDialer extends State<UnicornDialer>
           height: double.infinity,
           child: Stack(
               //fit: StackFit.expand,
-              alignment: Alignment.bottomCenter,
-              overflow: Overflow.visible,
+              clipBehavior: Clip.none, alignment: Alignment.bottomCenter,
               children: childButtonsList.toList()
                 ..add(Positioned(
                     right: null, bottom: null, child: mainFloatingButton))));
@@ -294,8 +288,7 @@ class _UnicornDialer extends State<UnicornDialer>
 
       return widget.hasBackground
           ? Stack(
-              alignment: Alignment.topCenter,
-              overflow: Overflow.visible,
+              clipBehavior: Clip.none, alignment: Alignment.topCenter,
               children: [
                   Positioned(right: -16.0, bottom: -16.0, child: modal),
                   unicornDialWidget

@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 class AnnounceCard extends StatelessWidget {
   final String date, title, message, url;
 
-  AnnounceCard({this.date, this.title, this.message, this.url});
+  AnnounceCard({required this.date, required this.title, required this.message, required this.url});
 
   @override
   Widget build(BuildContext context) {

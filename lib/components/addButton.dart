@@ -6,7 +6,7 @@ List<double> _stops = [0.0, 1.8];
 
 class AddButton extends StatelessWidget {
   const AddButton({
-    Key key,
+    required Key key,
   }) : super(key: key);
 
   @override

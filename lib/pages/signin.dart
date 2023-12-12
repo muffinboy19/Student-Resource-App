@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:studentresourceapp/pages/home.dart';
 import 'package:studentresourceapp/utils/signinutil.dart';

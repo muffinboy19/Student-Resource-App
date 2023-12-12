@@ -1,28 +1,30 @@
-import 'package:flutter/material.dart';
-import 'package:studentresourceapp/pages/userdetailgetter.dart';
+import 'package:flutter/material.dart'; 'package:studentresourceapp/pages/userdetailgetter.dart';
 import 'package:studentresourceapp/utils/contstants.dart';
 
 List<Color> _colors = [Constants.DARK_SKYBLUE, Constants.SKYBLUE];
 List<double> _stops = [0.0, 0.9];
 
-class CustomDropdown extends StatefulWidget {
-  String text;
-  int type; // 1 for semester, 2 for batch , 3 for branch
-  List<dynamic> list;
+class
+CustomDropdown
+    extends
+    StatefulWidget {
+  final  String text;
+  final  int type; // 1 for semester, 2 for batch , 3 for branch
+  final  List<dynamic> list;
 
   CustomDropdown(
-      {Key key, @required this.text, @required this.list, this.type});
+      {required Key key, required this.text, required this.list, required this.type});
   @override
   _CustomDropdownState createState() => _CustomDropdownState();
 }
 
 class _CustomDropdownState extends State<CustomDropdown> {
-  static MediaQueryData _mediaQueryData;
-  double screenHeight;
-  GlobalKey actionKey;
+  static MediaQueryData  mediaQueryData;
+   double screenHeight;
+  final GlobalKey actionKey;
   bool isDropDownOpen = false;
-  OverlayEntry floatingDropdown;
-  double height, width, xPosition, yPosition;
+  late OverlayEntry floatingDropdown;
+  late double height, width, xPosition, yPosition;
   String t = "";
 
   void findDropDownData() {

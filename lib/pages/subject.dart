@@ -1,10 +1,7 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:md2_tab_indicator/md2_tab_indicator.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:studentresourceapp/components/custom_loader.dart';
 import 'package:studentresourceapp/components/error_animatedtext.dart';
@@ -13,7 +10,6 @@ import 'package:studentresourceapp/pages/pdf.dart';
 import 'package:studentresourceapp/utils/unicorndial_edited.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:get_it/get_it.dart';
-import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
 import '../utils/contstants.dart';
 
 class CallService {
@@ -253,10 +249,7 @@ class _SubjectState extends State<Subject> with SingleTickerProviderStateMixin {
                 fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
           ),
           bottom: TabBar(
-            indicator: MD2Indicator(
-                indicatorHeight: 4,
-                indicatorColor: Colors.white,
-                indicatorSize: MD2IndicatorSize.normal),
+            indicatorColor: Colors.white,
             tabs: [
               Tab(
                 icon: ImageIcon(AssetImage('assets/svgIcons/book.png')),
@@ -650,7 +643,7 @@ class StreamWidget extends StatelessWidget {
 }
 
 class ListItem extends StatelessWidget {
-  final CallService _service = locator<CallService>();
+  // final CallService _service = locator<CallService>();
 
   @override
   ListItem({this.heading, this.subheaading, this.b, this.c, this.phone});
@@ -691,29 +684,7 @@ class ListItem extends StatelessWidget {
       );
     }
     if (phone == true) {
-      return Row(
-        children: <Widget>[
-          IconButton(
-              icon: Icon(
-                Icons.call,
-                color: Colors.teal,
-                size: 34.0,
-              ),
-              onPressed: () => _service.call(subheaading)),
-          SizedBox(
-            width: 25.0,
-          ),
-          IconButton(
-              icon: Icon(
-                FontAwesomeIcons.whatsapp,
-                color: Colors.teal,
-                size: 34.0,
-              ),
-              onPressed: () {
-                FlutterOpenWhatsapp.sendSingleMessage(subheaading, "");
-              })
-        ],
-      );
+      return Text('WhatsApp functionality disabled');
     }
 
     if (b == true) {
