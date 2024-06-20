@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:studentresourceapp/components/announcement_card.dart';
 import 'package:intl/intl.dart';
+import 'package:studentresourceapp/components/announcement_card.dart';
 import 'package:studentresourceapp/utils/sharedpreferencesutil.dart';
 import 'package:studentresourceapp/models/user.dart';
-import 'package:studentresourceapp/utils/contstants.dart';
+import 'package:studentresourceapp/utils/contstants.dart'; // Adjust import path if necessary
 import 'dart:convert';
 import 'package:studentresourceapp/components/navDrawer.dart';
-
-final _firestore = Firestore.instance;
 
 class Announcement extends StatefulWidget {
   @override
@@ -17,71 +16,91 @@ class Announcement extends StatefulWidget {
 
 class _AnnouncementState extends State<Announcement> {
   bool admin = false;
-  User userLoad = new User();
-  String directory;
-  List file = new List();
-  Future fetchUserDetailsFromSharedPref() async {
-    var result = await SharedPreferencesUtil.getStringValue(
-        Constants.USER_DETAIL_OBJECT);
-    Map valueMap = json.decode(result);
-    User user = User.fromJson(valueMap);
-    setState(() {
-      userLoad = user;
-    });
-  }
+  User userLoad = User(); // Initialize with an empty User object
+  List<Widget> updatesList = []; // Use List<Widget> for list of announcements
 
-  Future checkIfAdmin() async {
-    final QuerySnapshot result =
-        await Firestore.instance.collection('admins').getDocuments();
-    final List<DocumentSnapshot> documents = result.documents;
-    documents.forEach((data) {
-      if (data.documentID == userLoad.uid) {
-        setState(() {
-          admin = true;
-        });
-      }
-    });
-  }
-
-  List<dynamic> updatesList = [];
   @override
   void initState() {
-    fetchUserDetailsFromSharedPref();
-    checkIfAdmin();
-    fetchUpdates();
+    super.initState();
+    initializeData();
   }
 
-  void fetchUpdates() async {
-    await for (var snapshot in _firestore
-        .collection('announcements')
-        .orderBy('createdAt', descending: true)
-        .snapshots()) {
-      List<dynamic> newUpdatesList = [];
-      for (var message in snapshot.documents) {
-        String title, messg, url, displayDate;
-        messg = message.data['message'] ?? 'Message Text Unavailable';
-        title = message.data['title'] ?? 'Event Unavailable';
-        url = message.data['url'] ?? null;
-        final timestamp = message.data['createdAt'] ?? 1580187210337;
-        var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
-        displayDate = DateFormat("dd MMM yyyy hh:mm a").format(date).toString();
+  void initializeData() async {
+    await Firebase.initializeApp(); // Initialize Firebase app
+    await fetchUserDetailsFromSharedPref();
+    await checkIfAdmin();
+    await fetchUpdates();
+  }
 
-        newUpdatesList.add(AnnounceCard(
-          title: title,
-          date: displayDate,
-          message: messg,
-          url: url,
-        ));
+  Future<void> fetchUserDetailsFromSharedPref() async {
+    try {
+      var result = await SharedPreferencesUtil.getStringValue(
+          Constants.USER_DETAIL_OBJECT);
+      if (result != null) {
+        Map<String, dynamic> valueMap = json.decode(result); // Explicit type casting
+        User user = User.fromJson(valueMap);
+        setState(() {
+          userLoad = user;
+        });
       }
-      newUpdatesList.add(SizedBox(
-                    height: 100,
-                  ));
-      setState(() {
-        updatesList = newUpdatesList;
-      });
+    } catch (error) {
+      print('Error fetching user details: $error');
     }
   }
 
+  Future<void> checkIfAdmin() async {
+    try {
+      final QuerySnapshot result =
+      await FirebaseFirestore.instance.collection('admins').get();
+      final List<DocumentSnapshot> documents = result.docs;
+      documents.forEach((data) {
+        if (data.id == userLoad.uid) {
+          setState(() {
+            admin = true;
+          });
+        }
+      });
+    } catch (error) {
+      print('Error checking admin status: $error');
+    }
+  }
+
+  Future<void> fetchUpdates() async {
+    try {
+      await for (var snapshot in FirebaseFirestore.instance
+          .collection('announcements')
+          .orderBy('createdAt', descending: true)
+          .snapshots()) {
+        List<Widget> newUpdatesList = [];
+        for (var message in snapshot.docs) {
+          String title =
+              message.data()['title'] ?? 'Event Title Unavailable';
+          String messageText =
+              message.data()['message'] ?? 'Message Text Unavailable';
+          String url = message.data()['url'] ?? null;
+          final timestamp =
+              message.data()['createdAt'] ?? DateTime.now().millisecondsSinceEpoch;
+          var date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+          String displayDate =
+          DateFormat("dd MMM yyyy hh:mm a").format(date);
+
+          newUpdatesList.add(AnnounceCard(
+            title: title,
+            date: displayDate,
+            message: messageText,
+            url: url,
+          ));
+        }
+        setState(() {
+          updatesList = newUpdatesList;
+        });
+      }
+    } catch (error) {
+      print('Error fetching announcements: $error');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: NavDrawer(
@@ -92,18 +111,17 @@ class _AnnouncementState extends State<Announcement> {
         title: Text('Announcements'),
       ),
       body: Container(
-        child: updatesList.length == 0
+        padding: EdgeInsets.all(16.0),
+        child: updatesList.isEmpty
             ? Center(
-                child: Text('No Announcements Yet!'),
-              )
-            : Container(
-                child: ListView.builder(
-                  itemCount: updatesList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return updatesList[index];
-                  },
-                ),
-              ),
+          child: Text('No Announcements Yet!'),
+        )
+            : ListView.builder(
+          itemCount: updatesList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return updatesList[index];
+          },
+        ),
       ),
     );
   }

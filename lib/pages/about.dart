@@ -3,15 +3,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:getwidget/components/accordian/gf_accordian.dart';
-import 'package:getwidget/components/avatar/gf_avatar.dart';
-import 'package:getwidget/components/list_tile/gf_list_tile.dart';
-import 'package:getwidget/size/gf_size.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:studentresourceapp/components/navDrawer.dart';
 import 'package:studentresourceapp/models/user.dart';
-import 'package:studentresourceapp/utils/contstants.dart';
 import 'package:studentresourceapp/utils/sharedpreferencesutil.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../utils/contstants.dart';
 
 class About extends StatefulWidget {
   @override
@@ -19,36 +17,40 @@ class About extends StatefulWidget {
 }
 
 class _AboutState extends State<About> {
-  User userLoad = new User();
+  late User userLoad;
   bool admin = false;
-  Future fetchUserDetailsFromSharedPref() async {
-    var result = await SharedPreferencesUtil.getStringValue(
-        Constants.USER_DETAIL_OBJECT);
-    Map valueMap = json.decode(result);
-    User user = User.fromJson(valueMap);
-    setState(() {
-      userLoad = user;
-    });
+
+  @override
+  void initState() {
+    super.initState();
+    userLoad = User(); // Initialize userLoad
+    fetchUserDetailsFromSharedPref();
+    checkIfAdmin();
   }
 
-  Future checkIfAdmin() async {
+  Future<void> fetchUserDetailsFromSharedPref() async {
+    var result =
+    await SharedPreferencesUtil.getStringValue(Constants.USER_DETAIL_OBJECT);
+    if (result != null) {
+      Map<String, dynamic> valueMap = json.decode(result);
+      User user = User.fromJson(valueMap);
+      setState(() {
+        userLoad = user;
+      });
+    }
+  }
+
+  Future<void> checkIfAdmin() async {
     final QuerySnapshot result =
-        await Firestore.instance.collection('admins').getDocuments();
-    final List<DocumentSnapshot> documents = result.documents;
+    await FirebaseFirestore.instance.collection('admins').get();
+    final List<DocumentSnapshot> documents = result.docs;
     documents.forEach((data) {
-      if (data.documentID == userLoad.uid) {
+      if (data.id == userLoad.uid) {
         setState(() {
           admin = true;
         });
       }
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchUserDetailsFromSharedPref();
-    checkIfAdmin();
   }
 
   @override
@@ -59,342 +61,136 @@ class _AboutState extends State<About> {
         admin: admin,
       ),
       appBar: AppBar(title: Text('About Us')),
-      body: Container(
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              GFAccordion(
-                collapsedTitlebackgroundColor: Colors.transparent,
-                expandedTitlebackgroundColor: Colors.transparent,
-                contentbackgroundColor: Colors.transparent,
-                collapsedIcon: Text(''),
-                expandedIcon: Text(''),
-                showAccordion: true,
-                titlePadding: EdgeInsets.only(right: 10, left: 10, top: 10),
-                titleChild: ListTile(
-                  leading: Icon(
-                    FontAwesomeIcons.featherAlt,
-                    size: 32,
-                    color: Constants.DARK_SKYBLUE,
-                  ),
-                  title: Text(
-                    'About the App',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-                  ),
-                ),
-                contentPadding: EdgeInsets.only(left: 80),
-                contentChild: Padding(
-                  padding: const EdgeInsets.only(right: 14),
-                  child: RichText(
-                    textAlign: TextAlign.justify,
-                    text: TextSpan(
-                      style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontFamily: 'Montserrat'),
-                      children: [
-                        TextSpan(
-                          text:
-                              'Hola Friends! We all know the importance of notes given out by the professors and our mighty toppers. Even when the \"Indian guy on YouTube\" fails to get things into our thick brains, it is these notes that come to our rescue. Now what if there was a central place where you would get all the magical notes and material to sail through these examinations, like a complete pro! Fret not, for we present to you, the ',
-                        ),
-                        TextSpan(
-                            text: 'SemBreaker App',
-                            style: TextStyle(fontWeight: FontWeight.w600)),
-                        TextSpan(text: '. Sounds fun, right?'),
-                      ],
-                    ),
-                  ),
-                ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            _buildAccordion(
+              leadingIcon: FontAwesomeIcons.featherAlt,
+              title: 'About the App',
+              content: Text('Hola Friends! ...'),
+            ),
+            _buildAccordion(
+              leadingIcon: Icons.settings,
+              title: 'Features',
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _buildFeature('One place access to all the important notes...'),
+                  _buildFeature('Get the material across various semesters & courses.'),
+                  _buildFeature('Download the material that is important to you...'),
+                  _buildFeature('If you have got the notes you want upload...'),
+                ],
               ),
-              GFAccordion(
-                collapsedTitlebackgroundColor: Colors.transparent,
-                expandedTitlebackgroundColor: Colors.transparent,
-                contentbackgroundColor: Colors.transparent,
-                collapsedIcon: Text(''),
-                expandedIcon: Text(''),
-                titlePadding: EdgeInsets.only(
-                  right: 10,
-                  left: 10,
-                ),
-                titleChild: ListTile(
-                  leading: Icon(
-                    Icons.settings,
-                    color: Constants.DARK_SKYBLUE,
-                    size: 32,
-                  ),
-                  title: Text(
-                    'Features',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-                  ),
-                ),
-                contentPadding: EdgeInsets.only(left: 80, right: 14),
-                contentChild: Column(
-                  children: <Widget>[
-                    RichText(
-                      textAlign: TextAlign.justify,
-                      text: TextSpan(
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontFamily: 'Montserrat'),
-                        children: [
-                          TextSpan(
-                            text: '\u2022 ',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          TextSpan(
-                            text:
-                                'One place access to all the important notes, study materials and previous year questions papers of the examinations.',
-                          ),
-                        ],
-                      ),
-                    ),
-                    RichText(
-                      textAlign: TextAlign.justify,
-                      text: TextSpan(
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontFamily: 'Montserrat'),
-                        children: [
-                          TextSpan(
-                            text: '\u2022 ',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          TextSpan(
-                            text:
-                                'Get the material across various semesters & courses.',
-                          ),
-                        ],
-                      ),
-                    ),
-                    RichText(
-                      textAlign: TextAlign.justify,
-                      text: TextSpan(
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontFamily: 'Montserrat'),
-                        children: [
-                          TextSpan(
-                            text: '\u2022 ',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          TextSpan(
-                            text:
-                                'Download the material that is important to you on your local phone storage.',
-                          ),
-                        ],
-                      ),
-                    ),
-                    RichText(
-                      textAlign: TextAlign.justify,
-                      text: TextSpan(
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontFamily: 'Montserrat'),
-                        children: [
-                          TextSpan(
-                            text: '\u2022 ',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          TextSpan(
-                            text:
-                                'If you have got the notes you want upload, contact the moderator of the course mentioned in the app.',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+            _buildAccordion(
+              leadingIcon: Icons.settings_ethernet,
+              title: 'Contributors',
+              content: Column(
+                children: <Widget>[
+                  _buildContributor('Avneesh Kumar', 'https://avatars1.githubusercontent.com/u/54072374', 'https://github.com/Cybertron-Avneesh'),
+                  _buildContributor('Pranav Singhal', 'https://avatars2.githubusercontent.com/u/51447798', 'https://github.com/singhalpranav22'),
+                  _buildContributor('Shourya', 'https://avatars3.githubusercontent.com/u/58784199', 'https://github.com/lazyp4nd4'),
+                  _buildContributor('Tushar Kumar', 'https://avatars0.githubusercontent.com/u/58617063', 'https://github.com/tktakshila'),
+                  _buildContributor('Yukta Gopalani', 'https://avatars2.githubusercontent.com/u/59793009', 'https://github.com/yuktagopalani'),
+                ],
               ),
-              GFAccordion(
-                collapsedTitlebackgroundColor: Colors.transparent,
-                expandedTitlebackgroundColor: Colors.transparent,
-                contentbackgroundColor: Colors.transparent,
-                collapsedIcon: Text(''),
-                expandedIcon: Text(''),
-                titlePadding: EdgeInsets.only(
-                  right: 10,
-                  left: 10,
-                ),
-                titleChild: ListTile(
-                  leading: Icon(
-                    Icons.settings_ethernet,
-                    color: Constants.DARK_SKYBLUE,
-                    size: 32,
-                  ),
-                  title: Text(
-                    'Contributors',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-                  ),
-                ),
-                contentPadding: EdgeInsets.only(left: 80),
-                contentChild: Column(
-                  children: <Widget>[
-                    FlatButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () =>
-                          launch('https://github.com/Cybertron-Avneesh'),
-                      child: GFListTile(
-                        padding: EdgeInsets.only(
-                            right: 8, left: 0, bottom: 10, top: 10),
-                        margin: EdgeInsets.all(0),
-                        title: Text(
-                          'Avneesh Kumar',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
-                        ),
-                        avatar: GFAvatar(
-                          backgroundColor: Constants.DARK_SKYBLUE,
-                          size: GFSize.MEDIUM + 2,
-                          child: GFAvatar(
-                            backgroundImage: CachedNetworkImageProvider(
-                                'https://avatars1.githubusercontent.com/u/54072374'),
-                          ),
-                        ),
-                      ),
-                    ),
-                    FlatButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () =>
-                          launch('https://github.com/singhalpranav22'),
-                      child: GFListTile(
-                        padding: EdgeInsets.only(
-                            right: 8, left: 0, bottom: 10, top: 10),
-                        margin: EdgeInsets.all(0),
-                        title: Text(
-                          'Pranav Singhal',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
-                        ),
-                        avatar: GFAvatar(
-                          backgroundColor: Constants.DARK_SKYBLUE,
-                          size: GFSize.MEDIUM + 2,
-                          child: GFAvatar(
-                            backgroundImage: CachedNetworkImageProvider(
-                                'https://avatars2.githubusercontent.com/u/51447798'),
-                          ),
-                        ),
-                      ),
-                    ),
-                    FlatButton(
-                      onPressed: () => launch('https://github.com/lazyp4nd4'),
-                      padding: EdgeInsets.zero,
-                      child: GFListTile(
-                        padding: EdgeInsets.only(
-                            right: 8, left: 0, bottom: 10, top: 10),
-                        margin: EdgeInsets.all(0),
-                        title: Text(
-                          'Shourya',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
-                        ),
-                        avatar: GFAvatar(
-                          backgroundColor: Constants.DARK_SKYBLUE,
-                          size: GFSize.MEDIUM + 2,
-                          child: GFAvatar(
-                            backgroundImage: CachedNetworkImageProvider(
-                                'https://avatars3.githubusercontent.com/u/58784199'),
-                          ),
-                        ),
-                      ),
-                    ),
-                    FlatButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => launch('https://github.com/tktakshila'),
-                      child: GFListTile(
-                        padding: EdgeInsets.only(
-                            right: 8, left: 0, bottom: 10, top: 10),
-                        margin: EdgeInsets.all(0),
-                        title: Text(
-                          'Tushar Kumar',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
-                        ),
-                        avatar: GFAvatar(
-                          backgroundColor: Constants.DARK_SKYBLUE,
-                          size: GFSize.MEDIUM + 2,
-                          child: GFAvatar(
-                            backgroundImage: CachedNetworkImageProvider(
-                                'https://avatars0.githubusercontent.com/u/58617063'),
-                          ),
-                        ),
-                      ),
-                    ),
-                    FlatButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () =>
-                          launch('https://github.com/yuktagopalani'),
-                      child: GFListTile(
-                        padding: EdgeInsets.only(
-                            right: 8, left: 0, bottom: 10, top: 10),
-                        margin: EdgeInsets.all(0),
-                        title: Text(
-                          'Yukta Gopalani',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
-                        ),
-                        avatar: GFAvatar(
-                          backgroundColor: Constants.DARK_SKYBLUE,
-                          size: GFSize.MEDIUM + 2,
-                          child: GFAvatar(
-                            backgroundImage: CachedNetworkImageProvider(
-                                'https://avatars2.githubusercontent.com/u/59793009'),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+            _buildAccordion(
+              leadingIcon: 'assets/images/geekhaven.png',
+              title: 'About GeekHaven',
+              content: Text(
+                'GeekHaven is the technical Society of IIIT Allahabad. ...',
+                style: TextStyle(fontSize: 14),
+                textAlign: TextAlign.justify,
               ),
-              GFAccordion(
-                collapsedTitlebackgroundColor: Colors.transparent,
-                expandedTitlebackgroundColor: Colors.transparent,
-                contentbackgroundColor: Colors.transparent,
-                collapsedIcon: Text(''),
-                expandedIcon: Text(''),
-                titlePadding: EdgeInsets.only(
-                  right: 10,
-                  left: 10,
-                ),
-                titleChild: ListTile(
-                  leading: ImageIcon(
-                    AssetImage('assets/images/geekhaven.png'),
-                    color: Constants.DARK_SKYBLUE,
-                    size: 32,
-                  ),
-                  title: Text(
-                    'About GeekHaven',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-                  ),
-                ),
-                contentPadding: EdgeInsets.only(left: 80),
-                contentChild: Padding(
-                  padding: const EdgeInsets.only(right: 14),
-                  child: Text(
-                    'GeekHaven is the technical Society of IIIT Allahabad. Geekhaven is comprised of several wings. Comprising of some of the best technical minds of the college, GeekHaven is responsible for organising technical events throughout the year and promoting an overall technical culture in the college by holding regular workshops and quick-talks.\nFor any queries shoot us a mail at geekhaven@iiita.ac.in or contact us via the social media links.',
-                    style: TextStyle(fontSize: 14),
-                    textAlign: TextAlign.justify,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAccordion({
+    required dynamic leadingIcon,
+    required String title,
+    required Widget content,
+  }) {
+    return ExpansionPanelList(
+      elevation: 1,
+      expandedHeaderPadding: EdgeInsets.all(0),
+      dividerColor: Colors.transparent,
+      children: [
+        ExpansionPanel(
+          canTapOnHeader: true,
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return ListTile(
+              leading: _buildLeadingWidget(leadingIcon),
+              title: Text(
+                title,
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+              ),
+            );
+          },
+          body: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: content,
+          ),
+          isExpanded: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLeadingWidget(dynamic leadingIcon) {
+    if (leadingIcon is IconData) {
+      return Icon(
+        leadingIcon,
+        size: 32,
+        color: Constants.DARK_SKYBLUE,
+      );
+    } else if (leadingIcon is String && leadingIcon.endsWith('.png')) {
+      return CircleAvatar(
+        radius: 16,
+        backgroundImage: AssetImage(leadingIcon),
+      );
+    } else {
+      return Icon(
+        Icons.error,
+        size: 32,
+        color: Constants.DARK_SKYBLUE,
+      );
+    }
+  }
+
+  Widget _buildFeature(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: RichText(
+        textAlign: TextAlign.justify,
+        text: TextSpan(
+          style: TextStyle(fontSize: 14, color: Colors.black, fontFamily: 'Montserrat'),
+          children: [
+            TextSpan(text: '\u2022 ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+            TextSpan(text: text),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContributor(String name, String avatarUrl, String githubUrl) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundImage: CachedNetworkImageProvider(avatarUrl),
+          radius: 24,
+        ),
+        title: Text(
+          name,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+        ),
+        onTap: () => launch(githubUrl),
       ),
     );
   }

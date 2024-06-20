@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart'; 'package:studentresourceapp/pages/userdetailgetter.dart';
+import 'package:flutter/material.dart';
+import 'package:studentresourceapp/pages/userdetailgetter.dart';
 import 'package:studentresourceapp/utils/contstants.dart';
 
 List<Color> _colors = [Constants.DARK_SKYBLUE, Constants.SKYBLUE];
@@ -20,7 +21,7 @@ CustomDropdown
 
 class _CustomDropdownState extends State<CustomDropdown> {
   static MediaQueryData  mediaQueryData;
-   double screenHeight;
+   late double screenHeight;
 
 
 
@@ -31,7 +32,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
   String t = "";
 
   void findDropDownData() {
-    RenderBox renderBox = actionKey.currentContext.findRenderObject();
+    RenderObject? renderBox = actionKey.currentContext?.findRenderObject();
     height = renderBox.size.height;
     width = renderBox.size.width;
     Offset offset = renderBox.localToGlobal(Offset.zero);

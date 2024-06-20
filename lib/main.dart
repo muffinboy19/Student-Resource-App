@@ -5,35 +5,28 @@ import 'package:studentresourceapp/pages/userdetailgetter.dart';
 import 'package:studentresourceapp/utils/contstants.dart';
 import 'package:studentresourceapp/utils/sharedpreferencesutil.dart';
 import 'package:studentresourceapp/pages/subject.dart';
-import 'utils/contstants.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 void main() {
   set();
   runApp(MyApp());
 }
+
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  FirebaseMessaging firebaseMessaging ;
-
-  void fcmSubscribe() {
-    firebaseMessaging.subscribeToTopic('notifications');
-  }
-
-  void fcmUnSubscribe() {
-    firebaseMessaging.unsubscribeFromTopic('notifications');
-  }
-
+  late FirebaseMessaging firebaseMessaging;
 
   @override
   void initState() {
-    firebaseMessaging = new FirebaseMessaging();
-    fcmSubscribe();
+    super.initState();
+    firebaseMessaging = FirebaseMessaging.instance;
+    firebaseMessaging.subscribeToTopic('notifications');
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -42,24 +35,26 @@ class _MyAppState extends State<MyApp> {
         splashColor: Constants.SKYBLUE,
         fontFamily: 'Montserrat',
         primaryColor: Constants.DARK_SKYBLUE,
-        primaryIconTheme: IconTheme.of(context).copyWith(color: Colors.white),
+        primaryIconTheme: IconThemeData(color: Colors.white),
         indicatorColor: Constants.WHITE,
         primaryTextTheme: TextTheme(
-          titleLarge: TextStyle(color: Colors.white),
+          headline6: TextStyle(color: Colors.white),
         ),
         tabBarTheme: TabBarTheme(
           labelColor: Constants.WHITE,
-          labelStyle:
-          TextStyle(fontWeight: FontWeight.w600, color: Constants.WHITE),
+          labelStyle: TextStyle(fontWeight: FontWeight.w600, color: Constants.WHITE),
           unselectedLabelColor: Constants.SKYBLUE,
           unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500),
         ),
         pageTransitionsTheme: PageTransitionsTheme(
-          builders: <TargetPlatform, PageTransitionsBuilder>{
+          builders: {
             TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
-            TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
           },
-        ), colorScheme: ColorScheme(background: Colors.white),
+        ),
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          secondary: Constants.SKYBLUE,
+        ),
       ),
       title: 'SemBreaker',
       debugShowCheckedModeBanner: false,
@@ -67,12 +62,12 @@ class _MyAppState extends State<MyApp> {
         future: SharedPreferencesUtil.getBooleanValue(Constants.USER_LOGGED_IN),
         builder: (context, AsyncSnapshot<bool> snapshot) {
           if (snapshot.hasData) {
-            return snapshot.data ? Home() : UserDetailGetter();
-          } else
+            return snapshot.data! ? Home() : UserDetailGetter();
+          } else {
             return Blank();
+          }
         },
       ),
     );
   }
 }
-

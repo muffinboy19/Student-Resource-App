@@ -14,7 +14,7 @@ class SharedPreferencesUtil {
     return sharedPreferences.setBool(keyParam, valueParam);
   }
 
-  static Future<String> getStringValue(String keyParam) async {
+  static Future<String?> getStringValue(String keyParam) async {
     final SharedPreferences sharedPreferences =
         await SharedPreferences.getInstance();
     return sharedPreferences.getString(keyParam ?? '');
