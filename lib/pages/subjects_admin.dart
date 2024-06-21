@@ -27,6 +27,8 @@ class _SubjectsAdminState extends State<SubjectsAdmin> {
     'Books',
     'Moderators'
   ];
+
+  get canManageModerators => null;
   void addBookBottomSheet(BuildContext context, dynamic element) {
     String bookName = '';
     String author = '';
@@ -870,7 +872,7 @@ class _SubjectsAdminState extends State<SubjectsAdmin> {
                   );
                 } catch (e) {
                   print('Error: $e');
-                  return ErrorAnimatedText();
+                  return ErrorAnimatedText(key: null,);
                 }
               },
             ),

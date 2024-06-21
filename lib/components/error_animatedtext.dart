@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 
 class ErrorAnimatedText extends StatelessWidget {
-  const ErrorAnimatedText({required Key key}) : super(key: key);
+  const ErrorAnimatedText({required Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

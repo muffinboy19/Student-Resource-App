@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -11,12 +12,14 @@ import 'package:studentresourceapp/utils/unicorndial_edited.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:get_it/get_it.dart';
 import '../utils/contstants.dart';
+import 'package:get_it/get_it.dart';
+
 
 class CallService {
   void call(String number) => launch("tel:$number");
 }
 
-GetIt locator = GetIt();
+GetIt locator = GetIt as GetIt;
 
 void set() {
   locator.registerSingleton(CallService());
@@ -33,8 +36,8 @@ class Subject extends StatefulWidget {
 }
 
 class _SubjectState extends State<Subject> with SingleTickerProviderStateMixin {
-  ScrollController _scrollController;
-  AnimationController _hideFabAnimController;
+  late ScrollController _scrollController;
+  late AnimationController _hideFabAnimController;
 
   @override
   void initState() {
@@ -88,59 +91,80 @@ class _SubjectState extends State<Subject> with SingleTickerProviderStateMixin {
         return Container(
           decoration: BoxDecoration(
             color: Constants.WHITE,
-            borderRadius: new BorderRadius.only(
+            borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(24.0),
               topRight: const Radius.circular(24.0),
             ),
           ),
+          padding: EdgeInsets.all(16.0),
           child: Column(
+            mainAxisSize: MainAxisSize.min, // Ensure the column only takes minimum space needed
             children: <Widget>[
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 12),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      height: 6,
-                      width: 64,
-                      color: Colors.black45,
-                    ),
-                  ),
-                ),
+              Container(
+                height: 6,
+                width: 64,
+                color: Colors.black45,
               ),
-              StreamBuilder(
-                stream: Firestore.instance
+              SizedBox(height: 12),
+              StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
                     .collection('Subjects')
-                    .document('${widget.semester}_${widget.subjectCode}')
+                    .doc('${widget.semester}_${widget.subjectCode}')
                     .snapshots(),
                 builder: (context, snapshot) {
-                  List<Widget> messageWidget = [];
-                  if (snapshot.hasData) {
-                    List mod = snapshot.data['MODERATORS'];
-                    //print(mod);
-                    for (int i = 0; i < mod.length; i++) {
-                      final ctnum = mod[i]['Contact Number'];
-                      final name = mod[i]['Name'];
-                      dynamic it = Center(
-                          child: Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Montserrat',
-                        ),
-                      ));
-                      messageWidget.add(it);
-                      ListItem lis = ListItem(phone: true, subheaading: ctnum);
-                      messageWidget.add(lis);
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+                  if (!snapshot.hasData || snapshot.data == null || !snapshot.data!.exists) {
+                    return Center(child: Text('No data available'));
+                  }
 
-                      lis = ListItem(c: true);
-                      messageWidget.add(lis);
+                  List<Widget> messageWidgets = [];
+                  List<dynamic> mods = snapshot.data!.get('MODERATORS') ?? [];
+
+                  for (int i = 0; i < mods.length; i++) {
+                    final ctnum = mods[i]['Contact Number'];
+                    final name = mods[i]['Name'];
+                    messageWidgets.add(
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name ?? '',
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Montserrat',
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              ctnum ?? '',
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontFamily: 'Roboto',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                    // Add a divider between moderators
+                    if (i < mods.length - 1) {
+                      messageWidgets.add(Divider());
                     }
                   }
+
                   return Flexible(
                     child: ListView(
-                      children: messageWidget,
+                      shrinkWrap: true,
+                      physics: ClampingScrollPhysics(),
+                      children: messageWidgets,
                     ),
                   );
                 },
@@ -151,6 +175,7 @@ class _SubjectState extends State<Subject> with SingleTickerProviderStateMixin {
       },
     );
   }
+
 
   void recBooks(BuildContext context) {
     showModalBottomSheet(
@@ -164,59 +189,64 @@ class _SubjectState extends State<Subject> with SingleTickerProviderStateMixin {
         return Container(
           decoration: BoxDecoration(
             color: Constants.WHITE,
-            borderRadius: new BorderRadius.only(
+            borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(24.0),
               topRight: const Radius.circular(24.0),
             ),
           ),
+          padding: EdgeInsets.all(16.0),
           child: Column(
+            mainAxisSize: MainAxisSize.min, // Ensure the column only takes minimum space needed
             children: <Widget>[
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 12),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      height: 6,
-                      width: 64,
-                      color: Colors.black45,
-                    ),
-                  ),
-                ),
+              Container(
+                height: 6,
+                width: 64,
+                color: Colors.black45,
               ),
-              StreamBuilder(
-                stream: Firestore.instance
+              SizedBox(height: 12),
+              StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
                     .collection('Subjects')
-                    .document('${widget.semester}_${widget.subjectCode}')
+                    .doc('${widget.semester}_${widget.subjectCode}')
                     .snapshots(),
                 builder: (context, snapshot) {
-                  List<ListItem> messageWidget = [];
-                  if (snapshot.hasData) {
-                    List RecBooks = snapshot.data['Recommended Books'];
-                    print(RecBooks);
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+                  if (!snapshot.hasData || snapshot.data == null || !snapshot.data!.exists) {
+                    return Center(child: Text('No data available'));
+                  }
 
-                    for (int i = 0; i < RecBooks.length; i++) {
-                      final author = RecBooks[i]['Author'];
-                      final booktitle = RecBooks[i]['BookTitle'];
-                      final publication = RecBooks[i]['Publication'];
+                  List<Widget> messageWidgets = [];
+                  List<dynamic> recBooks = snapshot.data!.get('Recommended Books') ?? [];
 
-                      ListItem lis = ListItem(subheaading: booktitle, b: true);
-                      messageWidget.add(lis);
+                  for (int i = 0; i < recBooks.length; i++) {
+                    final author = recBooks[i]['Author'];
+                    final bookTitle = recBooks[i]['BookTitle'];
+                    final publication = recBooks[i]['Publication'];
 
-                      lis = ListItem(heading: 'Author : ', subheaading: author);
-                      messageWidget.add(lis);
+                    /*
+                    only for now i have put all of these as true adn tehy out to bee changed
+                     */
 
-                      lis = ListItem(
-                          heading: 'Publication : ', subheaading: publication);
+                    messageWidgets.add(ListItem(heading: bookTitle));
+                    messageWidgets.add(ListItem(heading: 'Author:', subheaading: author));
+                    messageWidgets.add(ListItem(heading: 'Publication:', subheaading: publication));
 
-                      messageWidget.add(lis);
-                      lis = ListItem(c: true);
-                      messageWidget.add(lis);
+                    // Add a divider between books
+                    if (i < recBooks.length - 1) {
+                      messageWidgets.add(Divider());
                     }
                   }
-                  return Expanded(
+
+                  return Flexible(
                     child: ListView(
-                      children: messageWidget,
+                      shrinkWrap: true,
+                      physics: ClampingScrollPhysics(),
+                      children: messageWidgets,
                     ),
                   );
                 },
@@ -227,6 +257,7 @@ class _SubjectState extends State<Subject> with SingleTickerProviderStateMixin {
       },
     );
   }
+
 
   @override
   void dispose() {
@@ -309,7 +340,7 @@ class _SubjectState extends State<Subject> with SingleTickerProviderStateMixin {
                     backgroundColor: Constants.DARK_SKYBLUE,
                     child: ImageIcon(AssetImage('assets/svgIcons/book.png'),
                         size: 20),
-                  ),
+                  ), labelBackgroundColor: Colors.white, labelShadowColor: null,
                 ),
                 UnicornButton(
                   labelColor: Colors.black,
@@ -327,7 +358,7 @@ class _SubjectState extends State<Subject> with SingleTickerProviderStateMixin {
                         size: 20),
                   ),
                 ),
-              ],
+              ], onMainButtonPressed: () {  },
             ),
           ),
         ),
@@ -338,10 +369,10 @@ class _SubjectState extends State<Subject> with SingleTickerProviderStateMixin {
 
 class StreamWidget extends StatelessWidget {
   const StreamWidget(
-      {Key key,
-      @required this.widget,
-      @required this.typeKey,
-      @required this.scrollController})
+      {Key? key,
+      required this.widget,
+      required this.typeKey,
+      required this.scrollController})
       : super(key: key);
   final ScrollController scrollController;
   final Subject widget;
@@ -349,287 +380,139 @@ class StreamWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: Firestore.instance
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
           .collection('Subjects')
-          .document('${widget.semester}_${widget.subjectCode}')
+          .doc('${widget.semester}_${widget.subjectCode}')
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          if (typeKey == 'Material') {
-            try {
-              List materialData = snapshot.data['Material'];
-              //print(materialData.toString());
-              List<Widget> listMaterials = [];
-              materialData.forEach(
-                (element) {
-                  listMaterials.add(
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(right: 16, left: 16, top: 12),
-                      child: Card(
-                        shadowColor: Color.fromRGBO(0, 0, 0, 0.75),
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            element['Title'],
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          leading: IconButton(
-                            icon: ImageIcon(
-                              AssetImage('assets/svgIcons/preview.png'),
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => PDFViewer(
-                                    url: element['Content URL'],
-                                    sem: widget.semester,
-                                    subjectCode: widget.subjectCode,
-                                    typeKey: typeKey,
-                                    uniqueID: int.parse(
-                                      element['id'],
-                                    ),
-                                    title: element['Title'],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          trailing: IconButton(
-                            icon: ImageIcon(
-                                AssetImage('assets/svgIcons/download.png'),
-                                size: 20),
-                            onPressed: () async {
-                              try {
-                                String url = element['Content URL'];
-                                String dir =
-                                    (await getApplicationDocumentsDirectory())
-                                        .path;
-                                String path =
-                                    "$dir/${widget.semester}_${widget.subjectCode}_${typeKey[0]}_${element['id']}_${element['Title']}";
-                                if (await File(path).exists()) {
-                                  //print('$path already exists');
-                                  Scaffold.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('File Already Downloaded'),
-                                    ),
-                                  );
-                                } else {
-                                  var request = await HttpClient().getUrl(
-                                    Uri.parse(url),
-                                  );
-                                  var response = await request.close();
-                                  var bytes =
-                                      await consolidateHttpClientResponseBytes(
-                                          response);
-                                  File file = new File(path);
-                                  await file.writeAsBytes(bytes).then((value) {
-                                    //print('$path is now downloaded');
-                                    Scaffold.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Download Complete'),
-                                      ),
-                                    );
-                                  });
-                                  return file;
-                                }
-                              } catch (err) {
-                                var errorMessage = "Error";
-                                print(errorMessage);
-                                print(err);
-                                return null;
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-              if (listMaterials.isEmpty) {
-                return NoContentAnimatedText();
-              }
-              listMaterials.add(
-                SizedBox(height: 100),
-              );
-              return Container(
-                child: ListView(
-                  children: listMaterials,
-                  controller: scrollController,
-                ),
-              );
-            } catch (err) {
-              return ErrorAnimatedText();
-            }
-          } else if (typeKey == 'QuestionPapers') {
-            try {
-              List materialData = snapshot.data['QuestionPapers'];
-              //print(materialData.toString());
-              List<Widget> listMaterials = [];
-              materialData.forEach(
-                (element) {
-                  listMaterials.add(
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(right: 16, left: 16, top: 12),
-                      child: Card(
-                        shadowColor: Color.fromRGBO(0, 0, 0, 0.75),
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ListTile(
-                          title: Text(element['Title'],
-                              style: TextStyle(fontWeight: FontWeight.w600)),
-                          subtitle:
-                              Text(element['Type'] + '-' + element['Year']),
-                          leading: IconButton(
-                            icon: ImageIcon(
-                                AssetImage('assets/svgIcons/preview.png')),
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => PDFViewer(
-                                    url: element['URL'],
-                                    sem: widget.semester,
-                                    subjectCode: widget.subjectCode,
-                                    typeKey: typeKey,
-                                    uniqueID: int.parse(element['id']),
-                                    title: element['Title'],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          trailing: IconButton(
-                            icon: ImageIcon(
-                                AssetImage('assets/svgIcons/download.png'),
-                                size: 20),
-                            onPressed: () async {
-                              try {
-                                String url = element['URL'];
-                                String dir =
-                                    (await getApplicationDocumentsDirectory())
-                                        .path;
-                                String path =
-                                    "$dir/${widget.semester}_${widget.subjectCode}_${typeKey[0]}_${element['id']}_${element['Title']}";
-                                if (await File(path).exists()) {
-                                  //print('$path already exists');
-                                  Scaffold.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('File Already Downloaded'),
-                                    ),
-                                  );
-                                } else {
-                                  var request = await HttpClient().getUrl(
-                                    Uri.parse(url),
-                                  );
-                                  var response = await request.close();
-                                  var bytes =
-                                      await consolidateHttpClientResponseBytes(
-                                          response);
-                                  File file = new File(path);
-                                  await file.writeAsBytes(bytes).then(
-                                    (value) {
-                                      //print('$path is now downloaded');
-                                      Scaffold.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Download Complete'),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                  return file;
-                                }
-                              } catch (err) {
-                                ErrorAnimatedText();
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-              if (listMaterials.isEmpty) {
-                return NoContentAnimatedText();
-              }
-              listMaterials.add(
-                SizedBox(height: 100),
-              );
-              return Container(
-                child: ListView(
-                    controller: scrollController, children: listMaterials),
-              );
-            } catch (err) {
-              return Center(
-                child: Text(
-                    'No Content available for this Subject.\n Come back later'),
-              );
-            }
-          } else if (typeKey == 'Important Links') {
-            try {
-              List materialData = snapshot.data['Important Links'];
-              //print(materialData.toString());
-              List<Widget> listMaterials = [];
-              materialData.forEach(
-                (element) {
-                  listMaterials.add(
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(right: 16, left: 16, top: 12),
-                      child: Card(
-                        shadowColor: Color.fromRGBO(0, 0, 0, 0.75),
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            element['Title'],
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          trailing: IconButton(
-                            icon: ImageIcon(
-                              AssetImage('assets/svgIcons/external Link.png'),
-                            ),
-                            onPressed: () {
-                              urlLauncher(
-                                element['Content URL'],
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-              if (listMaterials.isEmpty) {
-                return NoContentAnimatedText();
-              }
-              listMaterials.add(SizedBox(height: 100));
-              return Container(
-                child: ListView(
-                  children: listMaterials,
-                  controller: scrollController,
-                ),
-              );
-            } catch (err) {
-              return ErrorAnimatedText();
-            }
-          }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CustomLoader(); // Display a loader while waiting for data
         }
-        return CustomLoader();
+
+        if (snapshot.hasError) {
+          print('Firestore snapshot error: ${snapshot.error}');
+          return Center(child: Text('Error fetching data'));
+        }
+
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return NoContentAnimatedText(); // Display message when no data exists
+        }
+
+        try {
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+
+          List<Map<String, dynamic>> materialData = [];
+
+          // Determine which typeKey to use based on your app logic
+          if (typeKey == 'Material') {
+            materialData = List<Map<String, dynamic>>.from(data['Material'] ?? []);
+          } else if (typeKey == 'QuestionPapers') {
+            materialData = List<Map<String, dynamic>>.from(data['QuestionPapers'] ?? []);
+          } else if (typeKey == 'Important Links') {
+            materialData = List<Map<String, dynamic>>.from(data['Important Links'] ?? []);
+          }
+
+          // Check if materialData is empty and display appropriate message
+          if (materialData.isEmpty) {
+            return NoContentAnimatedText();
+          }
+
+          // Build list of widgets based on materialData
+          List<Widget> listMaterials = materialData.map((element) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ListTile(
+                  title: Text(
+                    element['Title'] ?? '', // Ensure 'Title' is not null
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: typeKey == 'QuestionPapers'
+                      ? Text('${element['Type'] ?? ''} - ${element['Year'] ?? ''}')
+                      : null,
+                  leading: IconButton(
+                    icon: ImageIcon(
+                      AssetImage('assets/svgIcons/preview.png'),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => PDFViewer(
+                            url: element['Content URL'] ?? '',
+                            sem: widget.semester,
+                            subjectCode: widget.subjectCode,
+                            typeKey: typeKey,
+                            uniqueID: int.parse(element['id'].toString()),
+                            title: element['Title'] ?? '',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  trailing: IconButton(
+                    icon: ImageIcon(
+                      AssetImage('assets/svgIcons/download.png'),
+                      size: 20,
+                    ),
+                    onPressed: () async {
+                      try {
+                        String url = element['Content URL'] ?? '';
+                        String dir = (await getApplicationDocumentsDirectory()).path;
+                        String path = "$dir/${widget.semester}_${widget.subjectCode}_${typeKey[0]}_${element['id']}_${element['Title']}";
+                        if (await File(path).exists()) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('File Already Downloaded'),
+                            ),
+                          );
+                        } else {
+                          var request = await HttpClient().getUrl(Uri.parse(url));
+                          var response = await request.close();
+                          var bytes = await consolidateHttpClientResponseBytes(response);
+                          File file = File(path);
+                          await file.writeAsBytes(bytes);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Download Complete'),
+                            ),
+                          );
+                        }
+                      } catch (err) {
+                        print('Error downloading file: $err');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error downloading file'),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ),
+            );
+          }).toList();
+
+          listMaterials.add(SizedBox(height: 100));
+
+          return Container(
+            child: ListView(
+              controller: scrollController,
+              children: listMaterials,
+            ),
+          );
+        } catch (err) {
+          print('Error building materials list: $err');
+          return ErrorAnimatedText(key: null,); // Display an error message if building the list fails
+        }
       },
     );
   }
+
 
   Future urlLauncher(url) async {
     {
@@ -646,14 +529,14 @@ class ListItem extends StatelessWidget {
   // final CallService _service = locator<CallService>();
 
   @override
-  ListItem({this.heading, this.subheaading, this.b, this.c, this.phone});
+  ListItem({required this.heading,  this.subheaading,  this.b,  this.c,  this.phone});
 
   String heading;
-  String subheaading;
-  Icon head;
-  bool b = false;
-  bool c = false;
-  bool phone = false;
+  String? subheaading;
+  // Icon head;
+  bool? b = false;
+  bool? c = false;
+  bool? phone = false;
 
   Widget build(BuildContext context) {
     return Padding(
@@ -708,7 +591,7 @@ class ListItem extends StatelessWidget {
               Flexible(
                 flex: 4,
                 child: Text(
-                  subheaading,
+                  subheaading!,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -741,7 +624,7 @@ class ListItem extends StatelessWidget {
                 ),
                 Flexible(
                   child: Text(
-                    subheaading,
+                    subheaading!,
                     style: TextStyle(
                       fontSize: 18.0,
                       fontFamily: 'Montserrat',

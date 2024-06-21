@@ -95,7 +95,12 @@ class _NavDrawerState extends State<NavDrawer> {
                   ),
                 ),
               ),
-              NavItem(
+              ListTile(
+                leading: ImageIcon(
+                  AssetImage("assets/grey icons/browser.png"),
+                  color: (current == 1) ? Constants.DARK_SKYBLUE : Constants.STEEL,
+                  size: 22.0,
+                ),
                 title: Text(
                   "Home",
                   style: TextStyle(
@@ -105,12 +110,7 @@ class _NavDrawerState extends State<NavDrawer> {
                     fontFamily: 'RobotoMono',
                   ),
                 ),
-                iconData: ImageIcon(
-                  AssetImage("assets/grey icons/browser.png"),
-                  color: (current == 1) ? Constants.DARK_SKYBLUE : Constants.STEEL,
-                  size: 22.0,
-                ),
-                onPressed: () {
+                onTap: () {
                   setState(() {
                     current = 1;
                   });
@@ -120,13 +120,15 @@ class _NavDrawerState extends State<NavDrawer> {
                     ModalRoute.withName('/'),
                   );
                 },
-                isSelected: current == 1,
+                selected: current == 1,
               ),
-              // Add similar NavItem widgets for other drawer items
-              // Downloads, Announcements, Share, Feedback, About
-
               if(widget.admin)
-                NavItem(
+                ListTile(
+                  leading: Icon(
+                    Icons.developer_mode,
+                    color: (current == 6) ? Constants.DARK_SKYBLUE : Constants.STEEL,
+                    size: 22.0,
+                  ),
                   title: Text(
                     "Admin Panel",
                     style: TextStyle(
@@ -136,12 +138,7 @@ class _NavDrawerState extends State<NavDrawer> {
                       fontFamily: 'RobotoMono',
                     ),
                   ),
-                  iconData: Icon(
-                    Icons.developer_mode,
-                    color: (current == 6) ? Constants.DARK_SKYBLUE : Constants.STEEL,
-                    size: 22.0,
-                  ),
-                  onPressed: () {
+                  onTap: () {
                     setState(() {
                       current = 6;
                     });
@@ -151,9 +148,14 @@ class _NavDrawerState extends State<NavDrawer> {
                       ModalRoute.withName('/'),
                     );
                   },
-                  isSelected: current == 6,
+                  selected: current == 6,
                 ),
-              NavItem(
+              ListTile(
+                leading: ImageIcon(
+                  AssetImage("assets/grey icons/logout.png"),
+                  color: (current == 7) ? Constants.DARK_SKYBLUE : Constants.STEEL,
+                  size: 22.0,
+                ),
                 title: Text(
                   "Log Out",
                   style: TextStyle(
@@ -163,15 +165,10 @@ class _NavDrawerState extends State<NavDrawer> {
                     fontFamily: 'RobotoMono',
                   ),
                 ),
-                iconData: ImageIcon(
-                  AssetImage("assets/grey icons/logout.png"),
-                  color: (current == 7) ? Constants.DARK_SKYBLUE : Constants.STEEL,
-                  size: 22.0,
-                ),
-                onPressed: () {
+                onTap: () {
                   buildSignOutDialog(context);
                 },
-                isSelected: current == 7,
+                selected: current == 7,
               ),
             ],
           ),
@@ -193,8 +190,6 @@ class _NavDrawerState extends State<NavDrawer> {
       ),
     );
   }
-
-
   Future<void> buildSignOutDialog(BuildContext context) async {
     bool confirmed = await showDialog(
       context: context,
@@ -231,13 +226,11 @@ class _NavDrawerState extends State<NavDrawer> {
       );
     }
   }
-
-
-
   void buildShowModalBottomSheet(BuildContext context) {
-    String name = "";
+    String name = widget.userData.name ?? "";
+    String _selectedBranch = widget.userData.branch ?? "";
     Color col = Colors.white;
-    _selectedBranch = widget.userData.branch!;
+
     showModalBottomSheet(
       isScrollControlled: true,
       isDismissible: true,
@@ -248,269 +241,276 @@ class _NavDrawerState extends State<NavDrawer> {
       ),
       context: context,
       builder: (builder) {
-        return Container(
-          height: MediaQuery.of(context).size.height - 150,
-          decoration: BoxDecoration(
-            color: Constants.WHITE,
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(24.0),
-              topRight: const Radius.circular(24.0),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 12),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      height: 6,
-                      width: 64,
-                      color: Colors.black45,
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              height: MediaQuery.of(context).size.height - 150,
+              decoration: BoxDecoration(
+                color: Constants.WHITE,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(24.0),
+                  topRight: const Radius.circular(24.0),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 12, bottom: 12),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          height: 6,
+                          width: 64,
+                          color: Colors.black45,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  children: <Widget>[
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(
-                          "Edit Profile",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
+                  Expanded(
+                    child: ListView(
+                      children: <Widget>[
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text(
+                              "Edit Profile",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 20.0,
-                        right: 20.0,
-                        bottom: 25.0,
-                        top: 0.0,
-                      ),
-                      child: Divider(
-                        height: 10.0,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 10.0, bottom: 3.0),
-                        child: Text(
-                          "Edit Name",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 20.0,
+                            right: 20.0,
+                            bottom: 25.0,
+                            top: 0.0,
+                          ),
+                          child: Divider(
+                            height: 10.0,
+                            color: Colors.blue,
                           ),
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextFormField(
-                        initialValue: name,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: widget.userData.name,
-                          labelText: 'Name',
-                        ),
-                        onChanged: (value) {
-                          name = value;
-                        },
-                      ),
-                    ),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 10.0, bottom: 3.0),
-                        child: Text(
-                          "Edit Branch",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 10.0, bottom: 3.0),
+                            child: Text(
+                              "Edit Name",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: FormField<String>(
-                        builder: (FormFieldState<String> state) {
-                          return InputDecorator(
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            initialValue: name,
                             decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
+                              border: OutlineInputBorder(),
+                              hintText: widget.userData.name,
+                              labelText: 'Name',
                             ),
-                            isEmpty: _selectedBranch == widget.userData.branch,
-                            child: DropdownButtonHideUnderline(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 12.0,
-                                  right: 12.0,
-                                ),
-                                child: DropdownButton<String>(
-                                  value: _selectedBranch,
-                                  isDense: true,
-                                  dropdownColor: Colors.white,
-                                  onChanged: (String newValue) {
-                                    setState(() {
-                                      _selectedBranch = newValue;
-                                      state.didChange(newValue);
-                                    });
-                                  },
-                                  items: _branches.map(
-                                        (String value) {
-                                      return DropdownMenuItem<String>(
-                                        child: Text(value),
-                                        value: value,
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
+                            onChanged: (value) {
+                              setState(() {
+                                name = value;
+                              });
+                            },
+                          ),
+                        ),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 10.0, bottom: 3.0),
+                            child: Text(
+                              "Edit Branch",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        await Firestore.instance
-                            .collection('userDetails')
-                            .document(widget.userData.uid.toString())
-                            .updateData({
-                          'name': name.isEmpty ? widget.userData.name : name,
-                          'branch': _selectedBranch,
-                        });
-                        await fetchUserDetailsFromSharedPref();
-                        userLoad.branch = _selectedBranch;
-                        userLoad.name = name.isEmpty ? widget.userData.name : name;
-
-                        await SharedPreferencesUtil.setBooleanValue(
-                          Constants.USER_LOGGED_IN,
-                          true,
-                        );
-                        await SharedPreferencesUtil.setStringValue(
-                          Constants.USER_DETAIL_OBJECT,
-                          userLoad.toString(),
-                        );
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => Home()),
-                          ModalRoute.withName("/Home"),
-                        );
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 108, vertical: 36),
-                        child: Container(
-                          height: 50.0,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            gradient: LinearGradient(
-                              colors: _colors,
-                              stops: _stops,
                             ),
                           ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FormField<String>(
+                            builder: (FormFieldState<String> state) {
+                              return InputDecorator(
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                  ),
+                                ),
+                                isEmpty: _selectedBranch == widget.userData.branch,
+                                child: DropdownButtonHideUnderline(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 12.0,
+                                      right: 12.0,
+                                    ),
+                                    child: DropdownButton<String>(
+                                      value: _selectedBranch,
+                                      isDense: true,
+                                      dropdownColor: Colors.white,
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          _selectedBranch = newValue!;
+                                        });
+                                      },
+                                      items: _branches.map(
+                                            (String value) {
+                                          return DropdownMenuItem<String>(
+                                            child: Text(value),
+                                            value: value,
+                                          );
+                                        },
+                                      ).toList(),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            await FirebaseFirestore.instance
+                                .collection('userDetails')
+                                .doc(widget.userData.uid)
+                                .update({
+                              'name': name.isEmpty ? widget.userData.name : name,
+                              'branch': _selectedBranch,
+                            });
+                            await fetchUserDetailsFromSharedPref();
+                            userLoad.branch = _selectedBranch;
+                            userLoad.name = name.isEmpty ? widget.userData.name : name;
+
+                            await SharedPreferencesUtil.setBooleanValue(
+                              Constants.USER_LOGGED_IN,
+                              true,
+                            );
+                            await SharedPreferencesUtil.setStringValue(
+                              Constants.USER_DETAIL_OBJECT,
+                              userLoad.toString(),
+                            );
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => Home()),
+                              ModalRoute.withName("/Home"),
+                            );
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 108, vertical: 36),
+                            child: Container(
+                              height: 50.0,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(25),
+                                gradient: LinearGradient(
+                                  colors: _colors,
+                                  stops: _stops,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "Save",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 20.0,
+                            right: 20.0,
+                            bottom: 25.0,
+                            top: 0.0,
+                          ),
+                          child: Divider(
+                            height: 10.0,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: Center(
                             child: Text(
-                              "Save",
+                              "Unique User ID (Tap To Copy)",
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20.0,
                                 fontWeight: FontWeight.bold,
+                                fontSize: 18.0,
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 20.0,
-                        right: 20.0,
-                        bottom: 25.0,
-                        top: 0.0,
-                      ),
-                      child: Divider(
-                        height: 10.0,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                        child: Text(
-                          "Unique User ID (Tap To Copy)",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            Clipboard.setData(
-                              ClipboardData(text: widget.userData.uid),
-                            );
-                          });
-                        },
-                        child: DottedBorder(
-                          radius: Radius.circular(12),
-                          color: Constants.DARK_SKYBLUE,
-                          padding: EdgeInsets.all(8),
-                          strokeWidth: 1,
-                          child: Center(
-                            child: Container(
-                              color: col,
-                              child: SelectableText(
-                                widget.userData.uid,
-                                style: TextStyle(
-                                  fontSize: 16,
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                Clipboard.setData(
+                                  ClipboardData(text: widget.userData.uid!),
+                                );
+                              });
+                            },
+                            child: DottedBorder(
+                              radius: Radius.circular(12),
+                              color: Constants.DARK_SKYBLUE,
+                              padding: EdgeInsets.all(8),
+                              strokeWidth: 1,
+                              child: Center(
+                                child: Container(
+                                  color: col,
+                                  child: SelectableText(
+                                    widget.userData.uid!,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
-}
 
-Future<List<String>> getShareAppUrl() async {
-  try {
-    QuerySnapshot snap =
-    await FirebaseFirestore.instance.collection("playstoreURL").get();
-    if (snap.docs.isNotEmpty) {
-      // Cast the data to Map<String, dynamic> before accessing elements
-      Map<String, dynamic> data = snap.docs.first.data() as Map<String, dynamic>;
-      return [data["msg"] as String, data["link"] as String];
-    } else {
-      throw Exception("No documents found");
+  Future<List<String>> getShareAppUrl() async {
+    try {
+      QuerySnapshot snap =
+      await FirebaseFirestore.instance.collection("playstoreURL").get();
+      if (snap.docs.isNotEmpty) {
+        // Cast the data to Map<String, dynamic> before accessing elements
+        Map<String, dynamic> data = snap.docs.first.data() as Map<String, dynamic>;
+        return [data["msg"] as String, data["link"] as String];
+      } else {
+        throw Exception("No documents found");
+      }
+    } catch (e) {
+      // Handle error
+      print("Error fetching URLs: $e");
+      return ["Error", "Error"];
     }
-  } catch (e) {
-    // Handle error
-    print("Error fetching URLs: $e");
-    return ["Error", "Error"];
   }
 }
+
+
 
 

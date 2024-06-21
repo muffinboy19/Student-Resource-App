@@ -115,7 +115,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               return Center(child: CustomLoader());
             }
             if (snapshot.hasError) {
-              return Center(child: ErrorAnimatedText());
+              return Center(child: ErrorAnimatedText(key: null,));
             }
             if (!snapshot.hasData || !snapshot.data!.exists) {
               return Center(child: NoContentAnimatedText());
@@ -126,7 +126,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             if (data != null) {
               Map<String, dynamic>? branches = data['branches'] as Map<String, dynamic>?;
               if (branches != null) {
-                branchSubjects = branches[userLoad.branch.toUpperCase()] as Map<String, dynamic>?;
+                branchSubjects = branches[userLoad.branch?.toUpperCase()] as Map<String, dynamic>?;
               }
             }
 
@@ -141,7 +141,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         context,
                         MaterialPageRoute(
                           builder: (context) => Subject(
-                            semester: userLoad.semester,
+                            semester: userLoad.semester!,
                             subjectCode: key,
                           ),
                         ),

@@ -11,8 +11,8 @@ class UnicornButton extends StatelessWidget {
   final String labelText;
   final double labelFontSize;
   final Color labelColor;
-  final Color labelBackgroundColor;
-  final Color labelShadowColor;
+  final Color? labelBackgroundColor;
+  final Color? labelShadowColor;
   final bool labelHasShadow;
   final bool hasLabel;
 
@@ -21,8 +21,8 @@ class UnicornButton extends StatelessWidget {
     required this.labelText,
     this.labelFontSize = 14.0,
     required this.labelColor,
-    required this.labelBackgroundColor,
-    required this.labelShadowColor,
+    this.labelBackgroundColor,
+    this.labelShadowColor,
     this.labelHasShadow = true,
     this.hasLabel = false,
   });
@@ -33,7 +33,7 @@ class UnicornButton extends StatelessWidget {
         boxShadow: labelHasShadow
             ? [
           BoxShadow(
-            color: labelShadowColor,
+            color: labelShadowColor!,
             blurRadius: 3.0,
           ),
         ]

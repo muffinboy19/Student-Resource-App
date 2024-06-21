@@ -6,7 +6,7 @@ class CustomDropdown extends StatefulWidget {
   final int type;
   final List<dynamic> list;
 
-  CustomDropdown({Key? key, required this.initialText, required this.list, required this.type}) : super(key: key);
+  CustomDropdown({Key? key, required this.initialText, required this.list, required this.type, required String text, required Null Function(dynamic value) onChanged}) : super(key: key);
 
   @override
   _CustomDropdownState createState() => _CustomDropdownState();

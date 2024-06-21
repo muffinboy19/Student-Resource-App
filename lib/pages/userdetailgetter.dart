@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:studentresourceapp/pages/signin.dart';
 import 'package:studentresourceapp/components/custom_dropdown.dart';
-import 'package:studentresourceapp/utils/contstants.dart';
-
-List<Color> _colors = [Constants.DARK_SKYBLUE, Constants.SKYBLUE];
-List<double> _stops = [0.0, 1.8];
-
-String college = "IIITA";
-int batch=2019;
-String branch='IT';
-int semester=3;
+import 'package:studentresourceapp/utils/contstants.dart'; // Assuming Constants is defined here
+import 'signin.dart'; // Adjust path to match your project structure
 
 class UserDetailGetter extends StatefulWidget {
   @override
@@ -18,15 +10,13 @@ class UserDetailGetter extends StatefulWidget {
 
 class _UserDetailGetterState extends State<UserDetailGetter> {
   List<String> _branches = ['IT', 'ITBI', 'ECE'];
-
   List<int> _semester = [1, 2, 3, 4, 5, 6, 7, 8];
-
   List<int> _batches = [2020, 2019, 2018, 2017, 2016];
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  String college = "IIITA";
+  int batch = 2019;
+  String branch = 'IT';
+  int semester = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -53,14 +43,14 @@ class _UserDetailGetterState extends State<UserDetailGetter> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 28.0, top: 8.0, bottom: 8.0),
+                    padding: const EdgeInsets.only(left: 28.0, top: 8.0, bottom: 8.0),
                     child: Text(
                       'Semester',
                       style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 24,
-                          color: Colors.black),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 24,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   Padding(
@@ -69,17 +59,22 @@ class _UserDetailGetterState extends State<UserDetailGetter> {
                       text: "",
                       list: _semester,
                       type: 1,
+                      onChanged: (value) {
+                        setState(() {
+                          semester = value;
+                        });
+                      }, initialText: 'hello',
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 28.0, top: 8.0, bottom: 8.0),
+                    padding: const EdgeInsets.only(left: 28.0, top: 8.0, bottom: 8.0),
                     child: Text(
                       'Batch',
                       style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 24,
-                          color: Colors.black),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 24,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   Padding(
@@ -88,17 +83,22 @@ class _UserDetailGetterState extends State<UserDetailGetter> {
                       text: "",
                       list: _batches,
                       type: 2,
+                      onChanged: (value) {
+                        setState(() {
+                          batch = value;
+                        });
+                      }, initialText: 'hwllo htis is tet',
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 28.0, top: 8.0, bottom: 8.0),
+                    padding: const EdgeInsets.only(left: 28.0, top: 8.0, bottom: 8.0),
                     child: Text(
                       'Branch',
                       style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 24,
-                          color: Colors.black),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 24,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   Padding(
@@ -107,22 +107,26 @@ class _UserDetailGetterState extends State<UserDetailGetter> {
                       text: "",
                       list: _branches,
                       type: 3,
+                      onChanged: (value) {
+                        setState(() {
+                          branch = value;
+                        });
+                      }, initialText: 'hwllo sss ',
                     ),
                   ),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: GestureDetector(
                       onTap: () {
-
-                        Navigator.of(context).push(
+                        Navigator.push(
+                          context,
                           MaterialPageRoute(
-                            builder: (context) {
-                              return SignIn(
-                                  college: college,
-                                  batch: batch,
-                                  branch: branch,
-                                  semester: semester);
-                            },
+                            builder: (context) => SignIn(
+                              college: college,
+                              batch: batch,
+                              branch: branch,
+                              semester: semester,
+                            ),
                           ),
                         );
                       },
@@ -134,8 +138,8 @@ class _UserDetailGetterState extends State<UserDetailGetter> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(25),
                             gradient: LinearGradient(
-                              colors: _colors,
-                              stops: _stops,
+                              colors: [Constants.DARK_SKYBLUE, Constants.SKYBLUE],
+                              stops: [0.0, 1.8],
                             ),
                           ),
                           child: Padding(
@@ -146,9 +150,10 @@ class _UserDetailGetterState extends State<UserDetailGetter> {
                                 Text(
                                   "Next",
                                   style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold),
+                                    color: Colors.white,
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 Icon(
                                   Icons.arrow_forward_ios,
@@ -170,3 +175,4 @@ class _UserDetailGetterState extends State<UserDetailGetter> {
     );
   }
 }
+
