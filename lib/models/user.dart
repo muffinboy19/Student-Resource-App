@@ -1,22 +1,23 @@
 class User {
-  String name;
-  String email;
-  String imageUrl;
-  String college;
-  int batch;
-  int semester;
-  String branch;
-  String uid;
+  String? name;
+  String? email;
+  String? imageUrl;
+  String? college;
+  int? batch;
+  int? semester;
+  String? branch;
+  String? uid;
 
-  User(
-      {this.name,
-      this.email,
-      this.imageUrl,
-      this.batch,
-      this.college,
-      this.branch,
-      this.semester,
-      this.uid});
+  User({
+    this.name,
+    this.email,
+    this.imageUrl,
+    this.batch,
+    this.college,
+    this.branch,
+    this.semester,
+    this.uid,
+  });
 
   User.fromJson(Map<String, dynamic> json) {
     uid = json['UID'];
@@ -30,15 +31,16 @@ class User {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> userDetail = new Map<String, dynamic>();
-    userDetail['UID'] = this.uid;
-    userDetail['Name'] = this.name;
-    userDetail['Email'] = this.email;
-    userDetail['ImageURL'] = this.imageUrl;
-    userDetail['College'] = this.college;
-    userDetail['Batch'] = this.batch;
-    userDetail['Branch'] = this.branch;
-    userDetail['Semester'] = this.semester;
+    final Map<String, dynamic> userDetail = {
+      'UID': uid,
+      'Name': name,
+      'Email': email,
+      'ImageURL': imageUrl,
+      'College': college,
+      'Batch': batch,
+      'Branch': branch,
+      'Semester': semester,
+    };
     return userDetail;
   }
 }

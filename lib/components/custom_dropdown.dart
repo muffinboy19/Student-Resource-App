@@ -1,62 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:studentresourceapp/pages/userdetailgetter.dart';
 import 'package:studentresourceapp/utils/contstants.dart';
 
-List<Color> _colors = [Constants.DARK_SKYBLUE, Constants.SKYBLUE];
-List<double> _stops = [0.0, 0.9];
+class CustomDropdown extends StatefulWidget {
+  final String initialText;
+  final int type;
+  final List<dynamic> list;
 
-class
-CustomDropdown
-    extends
-    StatefulWidget {
-  final  String text;
-  final  int type; // 1 for semester, 2 for batch , 3 for branch
-  final  List<dynamic> list;
+  CustomDropdown({Key? key, required this.initialText, required this.list, required this.type}) : super(key: key);
 
-  CustomDropdown(
-      {required Key key, required this.text, required this.list, required this.type});
   @override
   _CustomDropdownState createState() => _CustomDropdownState();
 }
 
 class _CustomDropdownState extends State<CustomDropdown> {
-  static MediaQueryData  mediaQueryData;
-   late double screenHeight;
-
-
-
-  final GlobalKey actionKey;
-  bool isDropDownOpen = false;
-  late OverlayEntry floatingDropdown;
-  late double height, width, xPosition, yPosition;
-  String t = "";
+  late GlobalKey actionKey;
+  OverlayEntry? floatingDropdown;
+  String selectedText = "";
 
   void findDropDownData() {
-    RenderObject? renderBox = actionKey.currentContext?.findRenderObject();
-    height = renderBox.size.height;
-    width = renderBox.size.width;
-    Offset offset = renderBox.localToGlobal(Offset.zero);
-    xPosition = offset.dx;
-    yPosition = offset.dy;
-    //print(height);
-    //print(width);
-    //print(xPosition);
-    //print(yPosition);
+    RenderBox? renderBox = actionKey.currentContext?.findRenderObject() as RenderBox?;
+    double height = renderBox?.size.height ?? 0.0;
+    double width = renderBox?.size.width ?? 0.0;
+    Offset offset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
+
+    double screenHeight = MediaQuery.of(context).size.height;
+    double dropdownHeight = offset.dy + height * 4 + 40 < screenHeight
+        ? height * 4 + 40
+        : screenHeight - offset.dy - 70.0;
+
+    floatingDropdown = _createFloatingDropdown(offset.dx, offset.dy + height, width, dropdownHeight);
   }
 
-  OverlayEntry _createFloatingDropdown() {
-    _mediaQueryData = MediaQuery.of(context);
-    screenHeight = _mediaQueryData.size.height;
-    //print(screenHeight);
-    //print(yPosition + 4 * height + 40);
+  OverlayEntry _createFloatingDropdown(double xPosition, double yPosition, double width, double height) {
     return OverlayEntry(builder: (context) {
       return Positioned(
         left: xPosition,
         width: width,
-        top: yPosition + height,
-        height: (yPosition + 4 * height + 40 < screenHeight)
-            ? 4 * height + 40
-            : screenHeight - yPosition - 70.0,
+        top: yPosition,
+        height: height,
         child: Card(
           elevation: 8.0,
           shape: RoundedRectangleBorder(
@@ -68,55 +49,28 @@ class _CustomDropdownState extends State<CustomDropdown> {
           child: Scrollbar(
             child: ListView.separated(
               padding: EdgeInsets.all(0.0),
-              separatorBuilder: (BuildContext context, int index) => Padding(
-                  padding: EdgeInsets.only(
-                      left: 15.0, right: 15.0, top: 0.0, bottom: 0.0),
-                  child: Divider(
-                      thickness: 2, height: 5, color: Constants.DARK_SKYBLUE)),
+              separatorBuilder: (BuildContext context, int index) => Divider(
+                thickness: 2,
+                height: 5,
+                color: Constants.DARK_SKYBLUE,
+              ),
               itemBuilder: (context, index) {
-                bool isSelected = false;
-                final item = widget.list[index];
-                if (t == item.toString()) isSelected = true;
-                //print(item.toString());
+                bool isSelected = selectedText == widget.list[index].toString();
                 return Material(
                   color: isSelected ? Constants.SKYBLUE : Colors.white,
                   child: ListTile(
-                      title: Text(
-                        item.toString(),
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      onTap: () {
-                        int temp = widget.type;
-                        //print(temp);
-                        if (temp == 1) {
-                          semester = item;
-                          t = item.toString();
-                          setState(() {
-                            widget.text = item.toString();
-                            floatingDropdown.remove();
-                            isDropDownOpen = !isDropDownOpen;
-                          });
-                          //print(semester);
-                        } else if (temp == 2) {
-                          batch = item;
-                          t = item.toString();
-                          setState(() {
-                            widget.text = item.toString();
-                            floatingDropdown.remove();
-                            isDropDownOpen = !isDropDownOpen;
-                          });
-                          //print(batch);
-                        } else if (temp == 3) {
-                          branch = item;
-                          t = item.toString();
-                          setState(() {
-                            widget.text = item.toString();
-                            floatingDropdown.remove();
-                            isDropDownOpen = !isDropDownOpen;
-                          });
-                          //print(branch);
-                        }
-                      }),
+                    title: Text(
+                      widget.list[index].toString(),
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    onTap: () {
+                      setState(() {
+                        selectedText = widget.list[index].toString();
+                        floatingDropdown?.remove();
+                        floatingDropdown = null; // Close dropdown
+                      });
+                    },
+                  ),
                 );
               },
               itemCount: widget.list.length,
@@ -129,8 +83,9 @@ class _CustomDropdownState extends State<CustomDropdown> {
 
   @override
   void initState() {
-    actionKey = LabeledGlobalKey(widget.text);
     super.initState();
+    actionKey = GlobalKey();
+    selectedText = widget.initialText;
   }
 
   @override
@@ -140,34 +95,29 @@ class _CustomDropdownState extends State<CustomDropdown> {
       child: GestureDetector(
         key: actionKey,
         onTap: () {
-          setState(() {
+          if (floatingDropdown == null) {
             findDropDownData();
-            if (isDropDownOpen) {
-              floatingDropdown.remove();
-            } else {
-              floatingDropdown = _createFloatingDropdown();
-              Overlay.of(context).insert(floatingDropdown);
-            }
-          });
-          isDropDownOpen = !isDropDownOpen;
+            Overlay.of(context)?.insert(floatingDropdown!);
+          } else {
+            floatingDropdown?.remove();
+            floatingDropdown = null; // Close dropdown
+          }
         },
         child: Container(
           height: 50.0,
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25),
-              gradient: LinearGradient(
-                colors: _colors,
-                stops: _stops,
-              )),
+            borderRadius: BorderRadius.circular(25),
+            gradient: LinearGradient(
+              colors: [Constants.DARK_SKYBLUE, Constants.SKYBLUE],
+              stops: [0.0, 0.9],
+            ),
+          ),
           padding: EdgeInsets.symmetric(horizontal: 25, vertical: 8),
           child: Row(
             children: [
               Text(
-                widget.text,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold),
+                selectedText,
+                style: TextStyle(color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
               Spacer(),
               Icon(
@@ -179,12 +129,5 @@ class _CustomDropdownState extends State<CustomDropdown> {
         ),
       ),
     );
-  }
-}
-
-class DropDown extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }

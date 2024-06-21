@@ -1,18 +1,19 @@
-import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
+import 'package:flare_flutter/flare_actor.dart';
 
 class CustomLoader extends StatelessWidget {
-  const CustomLoader({
-    Key key,
-  }) : super(key: key);
+  final Key? key;
+
+  const CustomLoader({this.key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: FlareActor(
-        'assets/flareFiles/book_loader.flr',
+        'assets/flareFiles/book_loader.flr', // Adjust this path as per your project structure
         alignment: Alignment.center,
-        animation: 'opening_closing',
+        fit: BoxFit.contain, // Ensure the animation fits within the widget
+        animation: 'opening_closing', // Specify the animation name
       ),
     );
   }

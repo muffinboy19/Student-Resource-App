@@ -33,7 +33,8 @@ class _DownloadsState extends State<Downloads> {
     var result =
     await SharedPreferencesUtil.getStringValue(Constants.USER_DETAIL_OBJECT);
     if (result != null) {
-      Map<String, dynamic> valueMap = Map<String, dynamic>.from(json.decode(result));
+      Map<String, dynamic> valueMap =
+      Map<String, dynamic>.from(json.decode(result));
       User user = User.fromJson(valueMap);
       setState(() {
         userLoad = user;
@@ -43,7 +44,8 @@ class _DownloadsState extends State<Downloads> {
 
   Future<void> checkIfAdmin() async {
     try {
-      final QuerySnapshot result = await FirebaseFirestore.instance.collection('admins').get();
+      final QuerySnapshot result =
+      await FirebaseFirestore.instance.collection('admins').get();
       final List<DocumentSnapshot> documents = result.docs;
       documents.forEach((data) {
         if (data.id == userLoad.uid) {
@@ -105,58 +107,55 @@ class _DownloadsState extends State<Downloads> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: ListTile(
-                  leading: IconButton(
-                    icon: ImageIcon(
-                      AssetImage('assets/svgIcons/preview.png'),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => PDFViewer(
-                            sem: sem,
-                            url: '',
-                            subjectCode: subjectCode,
-                            typeKey: typeKey,
-                            uniqueID: uniqueId,
-                            title: title,
-                          ),
-                        ),
-                      );
-                    },
+                  leading: ImageIcon(
+                    AssetImage('assets/svgIcons/preview.png'),
+                    size: 36, // Adjust size as needed
                   ),
                   title: Text(
                     title,
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  subtitle: Text('$sem/$subjectCode/${typeKey == 'M' ? 'Material' : 'Q-Paper'}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CustomFlatButton(
-                        text: 'Yes',
-                        onPressed: () async {
-                          try {
-                            if (await File(modifiedPath).exists()) {
-                              File(modifiedPath).deleteSync();
-                              setState(() {
-                                files.removeAt(index);
-                              });
-                            }
-                          } catch (err) {
-                            print('Error deleting file: $err');
-                          }
-                          Navigator.of(context).pop(true);
-                        },
+                  subtitle: Text(
+                      '$sem/$subjectCode/${typeKey == 'M' ? 'Material' : 'Q-Paper'}'),
+                  trailing: GestureDetector(
+                    onTap: () async {
+                      try {
+                        if (await File(modifiedPath).exists()) {
+                          File(modifiedPath).deleteSync();
+                          setState(() {
+                            files.removeAt(index);
+                          });
+                        }
+                      } catch (err) {
+                        print('Error deleting file: $err');
+                      }
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(5),
                       ),
-                      SizedBox(width: 8),
-                      CustomFlatButton(
-                        text: 'No',
-                        onPressed: () {
-                          Navigator.of(context).pop(true);
-                        },
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ],
+                    ),
                   ),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PDFViewer(
+                          sem: sem,
+                          url: '',
+                          subjectCode: subjectCode,
+                          typeKey: typeKey,
+                          uniqueID: uniqueId,
+                          title: title,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             );

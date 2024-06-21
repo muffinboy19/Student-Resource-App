@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:studentresourceapp/components/custom_loader.dart';
+import '../components/custom_loader.dart';
 import 'package:studentresourceapp/pages/subjects_admin.dart';
 
 class Admin extends StatefulWidget {
-  Admin({this.uid});
+  final String uid;
 
-  final uid;
+  const Admin({required this.uid});
 
   @override
   _AdminState createState() => _AdminState();
@@ -24,21 +24,24 @@ class _AdminState extends State<Admin> {
 
   Future<void> checkModeratorManageAccess() async {
     try {
-      final QuerySnapshot result = await FirebaseFirestore.instance
-          .collection('admins')
-          .get();
+      final QuerySnapshot<Map<String, dynamic>> result =
+      await FirebaseFirestore.instance.collection('admins').get();
 
-      final List<DocumentSnapshot> documents = result.docs;
-      documents.forEach((data) {
-        final Map<String, dynamic>? adminData = data.data() as Map<String, dynamic>?;
+      final List<DocumentSnapshot<Map<String, dynamic>>> documents =
+          result.docs;
 
-        if (adminData != null && adminData.containsKey('canManageModerators') && adminData['canManageModerators'] == true &&
-            data.id == widget.uid) {
-          setState(() {
-            canManageModerators = true;
-          });
-        }
-      });
+      final adminData = documents.firstWhere(
+            (doc) => doc.id == widget.uid,
+        orElse: () => null,
+      );
+
+      if (adminData != null &&
+          adminData.data().containsKey('canManageModerators') &&
+          adminData.data()['canManageModerators'] == true) {
+        setState(() {
+          canManageModerators = true;
+        });
+      }
     } catch (error) {
       print('Error retrieving admin data: $error');
     } finally {
@@ -55,43 +58,46 @@ class _AdminState extends State<Admin> {
         title: Text('Admin'),
       ),
       body: isLoading
-          ? CustomLoader()
-          : StreamBuilder(
+          ? CustomLoader() // Assuming CustomLoader is a widget showing a loading indicator
+          : StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('admins')
             .doc(widget.uid)
             .snapshots(),
-        builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.hasData) {
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data!.exists) {
             try {
-              List<dynamic> subjectAssigned =
-                  (snapshot.data!.data() as Map<String, dynamic>?)?['subjects_assigned'] ?? [];
+              List<dynamic> subjectAssigned = snapshot.data!
+                  .data()?['subjects_assigned'] ?? [];
+
               List<Widget> listMaterials = subjectAssigned
-                  .map((element) => Padding(
-                padding: const EdgeInsets.only(
-                    right: 16, left: 16, top: 12),
-                child: Card(
-                  shadowColor: Color.fromRGBO(0, 0, 0, 0.75),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ListTile(
-                    title: Text(element.toString()),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              SubjectsAdmin(
-                                subjectCode: element.toString(),
-                                canManageModerators: canManageModerators,
-                              ),
-                        ),
-                      );
-                    },
+                  .map(
+                    (element) => Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                  child: Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ListTile(
+                      title: Text(element.toString()),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                SubjectsAdmin(
+                                  subjectCode: element.toString(),
+                                  canManageModerators:
+                                  canManageModerators,
+                                ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ))
+              )
                   .toList();
 
               listMaterials.add(SizedBox(height: 100));

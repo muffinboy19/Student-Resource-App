@@ -23,7 +23,7 @@ void set() {
 }
 
 class Subject extends StatefulWidget {
-  Subject({this.semester, this.subjectCode});
+  Subject({required this.semester, required this.subjectCode});
 
   final int semester;
   final String subjectCode;

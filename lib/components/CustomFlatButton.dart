@@ -11,7 +11,7 @@ class CustomFlatButton extends StatelessWidget {
     required this.text,
     required this.onPressed,
     this.color = Colors.transparent,
-    this.textColor = Colors.black,
+    this.textColor = Colors.black, required ListTile child, required Color splashColor,
   }) : super(key: key);
 
   @override

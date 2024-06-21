@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 
 class NavItem extends StatelessWidget {
-  NavItem(
-      {this.iconData, this.title, this.onPressed, this.color, this.isSelected});
-  final title;
-  final iconData;
-  final Function onPressed;
-  final color;
-  bool isSelected = false;
+  final String title;
+  final IconData iconData;
+  final VoidCallback onPressed;
+  final Color color;
+  final bool isSelected;
+
+  NavItem({
+    required this.title,
+    required this.iconData,
+    required this.onPressed,
+    this.color = Colors.white,
+    this.isSelected = false,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: new BoxDecoration(
-        color: isSelected ? Color.fromRGBO(128, 128, 128, 0.25) : Colors.white,
+      decoration: BoxDecoration(
+        color: isSelected ? Color.fromRGBO(128, 128, 128, 0.25) : color,
       ),
       child: ListTile(
-        title: title,
-        leading: iconData,
+        title: Text(title),
+        leading: Icon(iconData),
         onTap: onPressed,
       ),
     );

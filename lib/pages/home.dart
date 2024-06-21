@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import '../components/CustomFlatButton.dart';
 import 'package:circle_list/circle_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,8 @@ import 'package:studentresourceapp/pages/subject.dart';
 import 'package:studentresourceapp/utils/contstants.dart';
 import 'package:studentresourceapp/utils/sharedpreferencesutil.dart';
 
+import '../components/CustomFlatButton.dart';
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -26,8 +27,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   bool admin = false;
 
   Future fetchUserDetailsFromSharedPref() async {
-    var result =
-    await SharedPreferencesUtil.getStringValue(Constants.USER_DETAIL_OBJECT);
+    var result = await SharedPreferencesUtil.getStringValue(Constants.USER_DETAIL_OBJECT);
     if (result != null) {
       Map<String, dynamic> valueMap = json.decode(result);
       User user = User.fromJson(valueMap);
@@ -38,8 +38,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Future checkIfAdmin() async {
-    final QuerySnapshot result =
-    await FirebaseFirestore.instance.collection('admins').get();
+    final QuerySnapshot result = await FirebaseFirestore.instance.collection('admins').get();
     final List<DocumentSnapshot> documents = result.docs;
     documents.forEach((data) {
       if (data.id == userLoad.uid) {
@@ -63,15 +62,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
     _scrollController.addListener(() {
       switch (_scrollController.position.userScrollDirection) {
-      // Scrolling up - forward the animation (value goes to 1)
         case ScrollDirection.forward:
           _hideFabAnimController.forward();
           break;
-      // Scrolling down - reverse the animation (value goes to 0)
         case ScrollDirection.reverse:
           _hideFabAnimController.reverse();
           break;
-      // Idle - keep FAB visibility unchanged
         case ScrollDirection.idle:
           break;
       }
@@ -113,10 +109,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       body: Padding(
         padding: const EdgeInsets.only(top: 20),
         child: StreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('Semesters')
-              .doc('${userLoad.semester}')
-              .snapshots(),
+          stream: FirebaseFirestore.instance.collection('Semesters').doc('${userLoad.semester}').snapshots(),
           builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CustomLoader());
@@ -128,55 +121,65 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               return Center(child: NoContentAnimatedText());
             }
 
-            Map<String, dynamic> branchSubjects =
-            snapshot.data!.data()!['branches'][userLoad.branch.toUpperCase()];
+            Map<String, dynamic>? branchSubjects;
+            Map<String, dynamic>? data = snapshot.data!.data() as Map<String, dynamic>?;
+            if (data != null) {
+              Map<String, dynamic>? branches = data['branches'] as Map<String, dynamic>?;
+              if (branches != null) {
+                branchSubjects = branches[userLoad.branch.toUpperCase()] as Map<String, dynamic>?;
+              }
+            }
+
             List<Widget> subjects = [];
 
-            branchSubjects.forEach((key, value) {
-              subjects.add(
-                CustomFlatButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Subject(
-                          semester: userLoad.semester,
-                          subjectCode: key,
+            if (branchSubjects != null) {
+              branchSubjects.forEach((key, value) {
+                subjects.add(
+                  CustomFlatButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Subject(
+                            semester: userLoad.semester,
+                            subjectCode: key,
+                          ),
+                        ),
+                      );
+                    },
+                    child: ListTile(
+                      leading: Image.asset(
+                        'assets/images/Computer.png',
+                        height: 32,
+                      ),
+                      title: Text(
+                        key,
+                        style: TextStyle(
+                          color: Constants.BLACK,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    );
-                  },
-                  child: ListTile(
-                    leading: Image.asset(
-                      'assets/images/Computer.png',
-                      height: 32,
-                    ),
-                    title: Text(
-                      key,
-                      style: TextStyle(
+                      subtitle: Text(
+                        value.toString(),
+                        style: TextStyle(
+                          color: Constants.STEEL,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      trailing: Icon(
+                        Icons.keyboard_arrow_right,
                         color: Constants.BLACK,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        size: 36,
                       ),
                     ),
-                    subtitle: Text(
-                      value.toString(),
-                      style: TextStyle(
-                        color: Constants.STEEL,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    trailing: Icon(
-                      Icons.keyboard_arrow_right,
-                      color: Constants.BLACK,
-                      size: 36,
-                    ),
+                    splashColor: Constants.SKYBLUE,
+                    text: 'Custom Text', // Replace with desired text
                   ),
-                  splashColor: Constants.SKYBLUE, text: '',
-                ),
-              );
-            });
+                );
+              });
+            }
 
             if (subjects.isEmpty) {
               return Center(child: NoContentAnimatedText());

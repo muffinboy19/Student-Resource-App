@@ -3,30 +3,55 @@ import 'package:flutter/material.dart';
 
 class NoContentAnimatedText extends StatelessWidget {
   const NoContentAnimatedText({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: TyperAnimatedTextKit(
-          //Case when there is no Material present
-          onTap: () {
-            //print("Tap Event");
-          },
-          speed: Duration(milliseconds: 100), //Duration of TextAnimation
-
-          text: [
+      child: AnimatedTextKit(
+        onTap: () {
+          // print("Tap Event");
+        },
+        animatedTexts: [
+          TyperAnimatedText(
             "Oops😵",
+            speed: Duration(milliseconds: 100),
+            textStyle: TextStyle(
+              fontSize: 25.0,
+            ),
+          ),
+          TyperAnimatedText(
             "It feels Lonely Here🙄",
-            "¯\_(ツ)_/¯",
-          ],
-          textStyle: TextStyle(
-            fontSize: 25.0,
+            speed: Duration(milliseconds: 100),
+            textStyle: TextStyle(
+              fontSize: 25.0,
+            ),
           ),
-          textAlign: TextAlign.center,
-          alignment: AlignmentDirectional.topStart // or Alignment.topLeft
+          TyperAnimatedText(
+            "¯\\_(ツ)_/¯",
+            speed: Duration(milliseconds: 100),
+            textStyle: TextStyle(
+              fontSize: 25.0,
+            ),
           ),
+        ],
+        totalRepeatCount: 1,
+        pause: Duration(milliseconds: 1000),
+        displayFullTextOnTap: true,
+        stopPauseOnTap: true,
+      ),
     );
   }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: Scaffold(
+      appBar: AppBar(
+        title: Text('No Content Animation'),
+      ),
+      body: NoContentAnimatedText(),
+    ),
+  ));
 }
